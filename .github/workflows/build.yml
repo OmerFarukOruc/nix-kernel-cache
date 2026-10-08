@@ -96,7 +96,7 @@ jobs:
           # shellcheck disable=SC2016 # a Nix expression, not shell
           nix eval --json .#packages.x86_64-linux --apply \
             'ps: { inherit (ps."kernel-x86_64-v3") version; paths = builtins.concatMap (p: map (o: p.${o}.outPath) p.outputs) (builtins.attrValues ps); }' \
-            | jq . >cached-paths.json
+            | jq --arg rev "${{ needs.lock.outputs.rev }}" '{ rev: $rev } + .' >cached-paths.json
 
       # Runs only after every variant was built and pushed, so the lock on main
       # names a revision whose paths are all in the cache.

@@ -16,7 +16,8 @@ The `variants` list in `flake.nix` names the CPU targets; each one builds in
 its own job. The workflow builds on every push to `main`, and once a day after moving
 `flake.lock` to the head of the upstream `release` branch. After the build and
 the push to Cachix succeed, it commits `flake.lock` with `cached-paths.json`,
-which lists the kernel version and every pushed output path. A host checks
+which lists the nix-cachyos-kernel revision, the kernel version and every pushed
+output path. A host checks
 those paths in the cache before it locks the same revision.
 
 Nothing unfree is built or pushed. The NVIDIA module builds from
