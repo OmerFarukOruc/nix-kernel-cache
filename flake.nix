@@ -18,20 +18,36 @@
         # github.com/NVIDIA/open-gpu-kernel-modules, is built and pushed.
         config.allowUnfree = true;
       };
-      kernelPackages = pkgs.cachyosKernels."linuxPackages-cachyos-latest-lto-x86_64-v3";
+      # One entry per CPU target a host selects (oruc.machine.kernel.profile).
+      variants = [
+        "x86_64-v3"
+        "zen4"
+      ];
+      kernelPackages = variant: pkgs.cachyosKernels."linuxPackages-cachyos-latest-lto-${variant}";
       # Must match the host's hardware.nvidia.package arguments exactly.
-      nvidia = kernelPackages.nvidiaPackages.mkDriver {
-        version = "615.71.09";
-        sha256_64bit = "sha256-zc7tIrvrYSSNGm3qvCWWZz46ZQFpjucayNL9wo87cP4=";
-        openSha256 = "sha256-3gByMYIwFzRaLdDG+roCEOuKRRJDrljG9AlLnRZTirM=";
-        settingsSha256 = "sha256-LK1LU8mDkM/XVRKPBtuOZh9nIP/lGFLAJnmasEX8jhg=";
-        persistencedSha256 = "sha256-qPRb+3d88+2RcpUkoBTbjIaImnQ+jX+/6p1vXcJ5geE=";
-      };
+      nvidiaOpen =
+        variant:
+        ((kernelPackages variant).nvidiaPackages.mkDriver {
+          version = "615.71.09";
+          sha256_64bit = "sha256-zc7tIrvrYSSNGm3qvCWWZz46ZQFpjucayNL9wo87cP4=";
+          openSha256 = "sha256-3gByMYIwFzRaLdDG+roCEOuKRRJDrljG9AlLnRZTirM=";
+          settingsSha256 = "sha256-LK1LU8mDkM/XVRKPBtuOZh9nIP/lGFLAJnmasEX8jhg=";
+          persistencedSha256 = "sha256-qPRb+3d88+2RcpUkoBTbjIaImnQ+jX+/6p1vXcJ5geE=";
+        }).open;
     in
     {
-      packages.x86_64-linux = {
-        kernel = kernelPackages.kernel;
-        nvidia-open = nvidia.open;
-      };
+      inherit variants;
+      packages.x86_64-linux = builtins.listToAttrs (
+        builtins.concatMap (variant: [
+          {
+            name = "kernel-${variant}";
+            value = (kernelPackages variant).kernel;
+          }
+          {
+            name = "nvidia-open-${variant}";
+            value = nvidiaOpen variant;
+          }
+        ]) variants
+      );
     };
 }
