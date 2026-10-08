@@ -1,0 +1,72 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # Follows the nix-cachyos-kernel release branch once a day.
+  schedule:
+    - cron: "23 3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Repository variable CACHIX_CACHE names the Cachix cache; the
+    # CACHIX_AUTH_TOKEN secret may push to it.
+    if: vars.CACHIX_CACHE != ''
+    runs-on: ubuntu-latest
+    # GitHub's limit for a job on a hosted runner.
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # An LTO kernel build needs more than the runner's free disk.
+      - uses: wimpysworld/nothing-but-nix@687c797a730352432950c707ab493fcc951818d7 # v10
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+
+      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: ${{ vars.CACHIX_CACHE }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          # Pushed explicitly below, so the push finishes before the commit.
+          skipPush: true
+
+      - name: Follow the release branch
+        if: github.event_name == 'schedule'
+        run: nix flake update nix-cachyos-kernel
+
+      - name: Build the kernel and the NVIDIA open module
+        run: nix build --print-build-logs --no-link '.#kernel^*' '.#nvidia-open^*'
+
+      # Hosts read this file to check the cache before they lock this revision.
+      - name: Record the cached paths
+        run: |
+          # shellcheck disable=SC2016 # a Nix expression, not shell
+          nix eval --json .#packages.x86_64-linux --apply \
+            'ps: { inherit (ps.kernel) version; paths = builtins.concatMap (p: map (o: p.${o}.outPath) p.outputs) [ ps.kernel ps.nvidia-open ]; }' \
+            | jq . >cached-paths.json
+
+      # Pushes each path with its closure; Cachix skips paths that
+      # cache.nixos.org already serves.
+      - name: Push to Cachix
+        run: jq -r '.paths[]' cached-paths.json | cachix push "${{ vars.CACHIX_CACHE }}"
+
+      # Committed only after the build and push succeeded, so the lock on main
+      # names a revision whose paths are in the cache.
+      - name: Commit the lock and the cached paths
+        run: |
+          if git diff --quiet -- flake.lock cached-paths.json && git ls-files --error-unmatch cached-paths.json >/dev/null 2>&1; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock cached-paths.json
+          git commit -m "chore: record the cached nix-cachyos-kernel build"
+          git push
