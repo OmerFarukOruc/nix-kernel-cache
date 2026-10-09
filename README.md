@@ -12,6 +12,12 @@ nixpkgs. A host gets a cache hit when it locks the same revision and uses the
 `pinned` overlay. The NVIDIA module also needs the same `mkDriver` arguments as
 the host's `hardware.nvidia.package`.
 
+The same path is what upstream's Hydra builds, so the build jobs and
+`scripts/build-local.sh` also read upstream's binary cache
+(`https://attic.xuyh0120.win/lantian`). A kernel still in that cache is
+downloaded and pushed to Cachix instead of compiled. That cache keeps outputs
+for a few days only, so it helps when the `release` branch has just moved.
+
 The `variants` list in `flake.nix` names the CPU targets; each one builds in
 its own job. The workflow builds on every push to `main`, and once a day after moving
 `flake.lock` to the head of the upstream `release` branch. After the build and
