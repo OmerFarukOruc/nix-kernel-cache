@@ -30,9 +30,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       rev: ${{ steps.rev.outputs.rev }}
+      sha: ${{ steps.rev.outputs.sha }}
       variants: ${{ steps.rev.outputs.variants }}
     steps:
+      # The tip of main, not the commit that queued this run. A run that waited
+      # behind another one would otherwise build its older lock and record it
+      # over the newer one.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
       - name: Follow the release branch
         if: github.event_name == 'schedule'
@@ -46,8 +52,11 @@ jobs:
           nix flake lock --override-input nix-cachyos-kernel "github:xddxdd/nix-cachyos-kernel/$REV"
       - id: rev
         run: |
-          echo "rev=$(jq -r '.nodes["nix-cachyos-kernel"].locked.rev' flake.lock)" >>"$GITHUB_OUTPUT"
-          echo "variants=$(nix eval --json .#variants)" >>"$GITHUB_OUTPUT"
+          {
+            echo "rev=$(jq -r '.nodes["nix-cachyos-kernel"].locked.rev' flake.lock)"
+            echo "sha=$(git rev-parse HEAD)"
+            echo "variants=$(nix eval --json .#variants)"
+          } >>"$GITHUB_OUTPUT"
 
   build:
     needs: lock
@@ -59,7 +68,10 @@ jobs:
       matrix:
         variant: ${{ fromJSON(needs.lock.outputs.variants) }}
     steps:
+      # The same flake.nix that the lock job read.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.lock.outputs.sha }}
 
       # An LTO kernel build needs more than the runner's free disk.
       - uses: wimpysworld/nothing-but-nix@687c797a730352432950c707ab493fcc951818d7 # v10
