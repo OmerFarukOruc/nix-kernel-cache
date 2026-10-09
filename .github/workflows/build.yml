@@ -64,6 +64,13 @@ jobs:
       - name: Lock the chosen revision
         run: nix flake lock --override-input nix-cachyos-kernel "github:xddxdd/nix-cachyos-kernel/${{ needs.lock.outputs.rev }}"
 
+      # Build times differ by about 2x between runs of the same work, so record
+      # the runner's CPU next to them.
+      - name: Show the runner's CPU
+        run: |
+          echo "$(nproc) CPUs: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2-)"
+          free -g | head -2
+
       - name: Build the kernel and the NVIDIA open module
         run: nix build --print-build-logs --no-link '.#kernel-${{ matrix.variant }}^*' '.#nvidia-open-${{ matrix.variant }}^*'
 
