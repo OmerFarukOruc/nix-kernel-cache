@@ -1,14 +1,14 @@
 {
-  "rev": "444d135dde71c1de547cf7bfd73e67145e67aebb",
+  "rev": "b1332396df6e880d7e3b6b451c6a74132ce8cf66",
   "paths": [
-    "/nix/store/7dg29syhkazl2zld6mfdkp5zq14ysgm7-linux-cachyos-latest-lto-x86_64-v3-7.2.4",
-    "/nix/store/58ga8mymrfbw1mkmn19ii8yxn58cfbk3-linux-cachyos-latest-lto-x86_64-v3-7.2.4-dev",
-    "/nix/store/5c1i2vjc7afbivaq5nfwjbbf1zk7la2a-linux-cachyos-latest-lto-x86_64-v3-7.2.4-modules",
-    "/nix/store/ys3rq1v8bsx2gqgi4big2diw1pgqs2z7-linux-cachyos-latest-lto-zen4-7.2.4",
-    "/nix/store/xfyj09rmyjsgvilkrwgxh634fs9r87j2-linux-cachyos-latest-lto-zen4-7.2.4-dev",
-    "/nix/store/3fbljv63karbrhk0qmk096rhmw4i60q1-linux-cachyos-latest-lto-zen4-7.2.4-modules",
-    "/nix/store/bjc3yja08xy9gppmjs2hlmxkx4gw0n65-nvidia-open-615.71.09-7.2.4",
-    "/nix/store/196hf58ddkdxa7cp8yi8g0fd2805x0rf-nvidia-open-615.71.09-7.2.4"
+    "/nix/store/kxs8qcaf100xpklda6qwrsv0yvbqsp0g-linux-cachyos-latest-lto-x86_64-v3-7.2.8",
+    "/nix/store/z2wks294x06bmd6lfa69hcsk0qc13x0n-linux-cachyos-latest-lto-x86_64-v3-7.2.8-dev",
+    "/nix/store/vn1lzz4blxwsj26l0byl36cjyw2g4gkw-linux-cachyos-latest-lto-x86_64-v3-7.2.8-modules",
+    "/nix/store/hj7g9kqll85wsrl6x9icl5sbrcc09dac-linux-cachyos-latest-lto-zen4-7.2.8",
+    "/nix/store/k1mrdra5hc6cfm0ll7m2nj883w1s9fx0-linux-cachyos-latest-lto-zen4-7.2.8-dev",
+    "/nix/store/z3433q37sc6sdq54bdk7mfak04c0y25g-linux-cachyos-latest-lto-zen4-7.2.8-modules",
+    "/nix/store/vggl5326j6hshyhhhblq4nmni31whh60-nvidia-open-615.71.09-7.2.8",
+    "/nix/store/kkwkgbkywvg50x97wdrry2ckcwr01rki-nvidia-open-615.71.09-7.2.8"
   ],
-  "version": "7.2.4"
+  "version": "7.2.8"
 }
