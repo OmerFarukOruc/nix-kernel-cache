@@ -29,3 +29,19 @@ Nothing unfree is built or pushed. The NVIDIA module builds from
   while it is unset.
 - Repository secret `CACHIX_AUTH_TOKEN`: a Cachix token that may push to that
   cache.
+
+## Building on another machine
+
+A hosted runner has 4 CPUs, and an LTO kernel takes it about 2 to 4 hours, close
+to the job's 6-hour limit. `scripts/build-local.sh` builds variants in a
+`nixos/nix` container on a faster machine and pushes them to the cache. With
+`--record` it then starts the workflow, which finds every path in the cache and
+records the build.
+
+```sh
+CACHIX_AUTH_TOKEN=... scripts/build-local.sh --rev <nix-cachyos-kernel sha> --record zen4 x86_64-v3
+```
+
+The token comes from the environment; push only these kernel outputs, because
+the cache is public. The workflow can also be started by hand for one revision:
+`gh workflow run build -f rev=<sha>`.

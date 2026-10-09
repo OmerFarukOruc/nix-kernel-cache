@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      rev:
+        description: nix-cachyos-kernel revision to build and record (default the locked one)
+        required: false
+        default: ""
   # Follows the nix-cachyos-kernel release branch once a day.
   schedule:
     - cron: "23 3 * * *"
@@ -32,6 +37,13 @@ jobs:
       - name: Follow the release branch
         if: github.event_name == 'schedule'
         run: nix flake update nix-cachyos-kernel
+      - name: Use the requested revision
+        if: inputs.rev != ''
+        env:
+          REV: ${{ inputs.rev }}
+        run: |
+          [[ $REV =~ ^[0-9a-f]{40}$ ]] || { echo "rev must be a full commit SHA" >&2; exit 1; }
+          nix flake lock --override-input nix-cachyos-kernel "github:xddxdd/nix-cachyos-kernel/$REV"
       - id: rev
         run: |
           echo "rev=$(jq -r '.nodes["nix-cachyos-kernel"].locked.rev' flake.lock)" >>"$GITHUB_OUTPUT"
