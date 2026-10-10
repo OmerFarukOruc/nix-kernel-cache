@@ -7,8 +7,8 @@
     "/nix/store/hj7g9kqll85wsrl6x9icl5sbrcc09dac-linux-cachyos-latest-lto-zen4-7.2.8",
     "/nix/store/k1mrdra5hc6cfm0ll7m2nj883w1s9fx0-linux-cachyos-latest-lto-zen4-7.2.8-dev",
     "/nix/store/z3433q37sc6sdq54bdk7mfak04c0y25g-linux-cachyos-latest-lto-zen4-7.2.8-modules",
-    "/nix/store/vggl5326j6hshyhhhblq4nmni31whh60-nvidia-open-615.71.09-7.2.8",
-    "/nix/store/kkwkgbkywvg50x97wdrry2ckcwr01rki-nvidia-open-615.71.09-7.2.8"
+    "/nix/store/y9vj8zh0dhzib3f3jxgxz9ly9z24hga0-nvidia-open-615.78.08-7.2.8",
+    "/nix/store/f3r0yif66n84kjixy1wvilfkz47qgwzn-nvidia-open-615.78.08-7.2.8"
   ],
   "version": "7.2.8"
 }
