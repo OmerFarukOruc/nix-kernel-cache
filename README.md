@@ -30,14 +30,14 @@ which lists the nix-cachyos-kernel revision, the kernel version and every pushed
 output path. A host checks
 those paths in the cache before it locks the same revision.
 
-`shells/flake.nix` builds the two desktop shells the hosts would otherwise
-compile, [Noctalia](https://github.com/noctalia-dev/noctalia) and
-[DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) (both
-MIT), the way the hosts do: at a release tag, following nixos-unstable. Every
-hour the `shells` workflow moves that flake to the head of nixos-unstable and
-to each shell's newest release (`scripts/pin-release.sh`), then builds and
-pushes each package the cache lacks. It commits nothing. A host moves nixpkgs
-and the shells' tags only once the cache holds those builds.
+`shells/flake.nix` builds the desktop shell the hosts would otherwise compile,
+[DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) (MIT),
+the way the hosts do: at a release tag, following nixos-unstable. Every hour
+the `shells` workflow moves that flake to the head of nixos-unstable and to the
+newest DMS release (`scripts/pin-release.sh`), then builds and pushes it when
+the cache lacks it. It commits nothing. A host moves nixpkgs and the DMS tag
+only once the cache holds that build. The hosts take Noctalia from nixpkgs,
+which the NixOS cache holds.
 
 Nothing unfree is built or pushed. The NVIDIA module builds from
 [open-gpu-kernel-modules](https://github.com/NVIDIA/open-gpu-kernel-modules).
