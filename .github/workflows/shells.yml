@@ -5,8 +5,8 @@ on:
     branches: [main]
     paths: [shells/**, scripts/pin-release.sh, .github/workflows/shells.yml]
   workflow_dispatch:
-  # nixos-unstable and the shells' releases move at any hour, and the hosts
-  # move nixpkgs only once these builds are in the cache.
+  # nixos-unstable and DMS releases move at any hour, and the hosts move
+  # nixpkgs only once this build is in the cache.
   schedule:
     - cron: "17 * * * *"
 
@@ -39,7 +39,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           nix flake update nixpkgs --flake ./shells
-          for input in noctalia dms; do
+          for input in dms; do
             repo=$(jq -r --arg i "$input" '.nodes[$i].original | "\(.owner)/\(.repo)"' shells/flake.lock)
             tag=$(gh api "repos/$repo/releases/latest" --jq .tag_name)
             scripts/pin-release.sh "$input" "$tag"
@@ -49,7 +49,7 @@ jobs:
         env:
           CACHE: ${{ vars.CACHIX_CACHE }}
         run: |
-          for package in noctalia dms; do
+          for package in dms; do
             path=$(nix eval --raw "./shells#$package.outPath")
             hash=${path#/nix/store/}
             if curl -fsS --max-time 20 -o /dev/null "https://$CACHE.cachix.org/${hash%%-*}.narinfo"; then
