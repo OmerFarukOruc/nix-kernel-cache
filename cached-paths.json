@@ -8,7 +8,9 @@
     "/nix/store/k1mrdra5hc6cfm0ll7m2nj883w1s9fx0-linux-cachyos-latest-lto-zen4-7.2.8-dev",
     "/nix/store/z3433q37sc6sdq54bdk7mfak04c0y25g-linux-cachyos-latest-lto-zen4-7.2.8-modules",
     "/nix/store/y9vj8zh0dhzib3f3jxgxz9ly9z24hga0-nvidia-open-615.78.08-7.2.8",
-    "/nix/store/f3r0yif66n84kjixy1wvilfkz47qgwzn-nvidia-open-615.78.08-7.2.8"
+    "/nix/store/f3r0yif66n84kjixy1wvilfkz47qgwzn-nvidia-open-615.78.08-7.2.8",
+    "/nix/store/a0xby4l4462xkcvp1mrfxkv5lmmls27n-ryzen-smu-7.2.8-0.1.7-unstable-2026-08-15",
+    "/nix/store/jrslmarlgand7bnxhniamwhi6wkryp18-turbostat-7.2.8"
   ],
   "version": "7.2.8"
 }
