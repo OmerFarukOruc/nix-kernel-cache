@@ -26,6 +26,15 @@ which lists the nix-cachyos-kernel revision, the kernel version and every pushed
 output path. A host checks
 those paths in the cache before it locks the same revision.
 
+`shells/flake.nix` builds the two desktop shells the hosts would otherwise
+compile, [Noctalia](https://github.com/noctalia-dev/noctalia) and
+[DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) (both
+MIT), the way the hosts do: at a release tag, following nixos-unstable. Every
+hour the `shells` workflow moves that flake to the head of nixos-unstable and
+to each shell's newest release (`scripts/pin-release.sh`), then builds and
+pushes each package the cache lacks. It commits nothing. A host moves nixpkgs
+and the shells' tags only once the cache holds those builds.
+
 Nothing unfree is built or pushed. The NVIDIA module builds from
 [open-gpu-kernel-modules](https://github.com/NVIDIA/open-gpu-kernel-modules).
 
@@ -48,6 +57,6 @@ records the build.
 CACHIX_AUTH_TOKEN=... scripts/build-local.sh --rev <nix-cachyos-kernel sha> --record zen4 x86_64-v3
 ```
 
-The token comes from the environment; push only these kernel outputs, because
-the cache is public. The workflow can also be started by hand for one revision:
-`gh workflow run build -f rev=<sha>`.
+The token comes from the environment; push only the kernel and shell outputs,
+because the cache is public. The `build` workflow can also be started by hand
+for one revision: `gh workflow run build -f rev=<sha>`.
