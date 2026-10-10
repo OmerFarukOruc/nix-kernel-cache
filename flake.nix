@@ -1,5 +1,5 @@
 {
-  description = "Builds the CachyOS kernel and NVIDIA open module that OmerFarukOruc's NixOS hosts use, for a public Cachix cache";
+  description = "Builds the CachyOS kernel and what OmerFarukOruc's NixOS hosts build against it, for a public Cachix cache";
 
   # The release branch only moves after the upstream Hydra built the kernel.
   inputs.nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
@@ -34,20 +34,37 @@
           settingsSha256 = "sha256-inDRpG02sdDgHmlqgu/DsgK8OFdOt1fZIYyXdhlGC/c=";
           persistencedSha256 = "sha256-RzeR6Ldct6MUxjnXRyThdh5Y3jjMehTVg85MtwuWNX4=";
         }).open;
+      # Everything a host builds against the kernel, by output name. Out-of-tree
+      # modules and kernel tools must come from the same kernel package set.
+      # A variant builds only what its hosts use, because one failed build
+      # keeps the record job from moving every host to the new kernel.
+      hostPackages = {
+        x86_64-v3 = [ ];
+        # nixos-rog: hardware.cpu.amd.ryzen-smu and environment.systemPackages.
+        zen4 = [
+          "ryzen-smu"
+          "turbostat"
+        ];
+      };
+      packagesFor =
+        variant:
+        {
+          kernel = (kernelPackages variant).kernel;
+          nvidia-open = nvidiaOpen variant;
+        }
+        // pkgs.lib.getAttrs hostPackages.${variant} (kernelPackages variant);
+      # Output names carry the variant, for example ryzen-smu-zen4.
+      perVariant = pkgs.lib.genAttrs variants (
+        variant:
+        pkgs.lib.mapAttrs' (name: pkgs.lib.nameValuePair "${name}-${variant}") (packagesFor variant)
+      );
     in
     {
       inherit variants;
-      packages.x86_64-linux = builtins.listToAttrs (
-        builtins.concatMap (variant: [
-          {
-            name = "kernel-${variant}";
-            value = (kernelPackages variant).kernel;
-          }
-          {
-            name = "nvidia-open-${variant}";
-            value = nvidiaOpen variant;
-          }
-        ]) variants
-      );
+      # The installables that the workflow and build-local.sh build per variant.
+      installables = builtins.mapAttrs (
+        _: ps: builtins.concatStringsSep " " (map (name: ".#${name}^*") (builtins.attrNames ps))
+      ) perVariant;
+      packages.x86_64-linux = pkgs.lib.mergeAttrsList (builtins.attrValues perVariant);
     };
 }

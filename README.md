@@ -3,8 +3,12 @@
 Builds the CachyOS kernel (`linux-cachyos-latest-lto-x86_64-v3` and
 `linux-cachyos-latest-lto-zen4` from
 [nix-cachyos-kernel](https://github.com/xddxdd/nix-cachyos-kernel)) and the
-NVIDIA open kernel module for each on GitHub Actions and pushes them to a public Cachix
-cache, so the NixOS hosts that use them do not compile them.
+NVIDIA open kernel module for each on GitHub Actions, plus `ryzen-smu` and
+`turbostat` for zen4, and pushes them to a public Cachix cache, so the NixOS
+hosts that use them do not compile them. `hostPackages` in `flake.nix` lists
+what each variant's hosts build against the kernel. A failed build of any of
+them stops the run before it records the new revision, so no host moves to that
+kernel until the next run succeeds.
 
 The kernel's store path depends only on the nix-cachyos-kernel revision in
 `flake.lock`, because the input's `pinned` overlay builds with the input's own
@@ -57,6 +61,6 @@ records the build.
 CACHIX_AUTH_TOKEN=... scripts/build-local.sh --rev <nix-cachyos-kernel sha> --record zen4 x86_64-v3
 ```
 
-The token comes from the environment; push only the kernel and shell outputs,
-because the cache is public. The `build` workflow can also be started by hand
+The token comes from the environment; push only the outputs in `flake.nix` and
+`shells/flake.nix`, because the cache is public. The `build` workflow can also be started by hand
 for one revision: `gh workflow run build -f rev=<sha>`.

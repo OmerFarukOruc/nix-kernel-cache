@@ -101,17 +101,16 @@ jobs:
           echo "$(nproc) CPUs: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2-)"
           free -g | head -2
 
-      - name: Build the kernel and the NVIDIA open module
-        run: nix build --print-build-logs --no-link '.#kernel-${{ matrix.variant }}^*' '.#nvidia-open-${{ matrix.variant }}^*'
+      - name: Build the kernel, its modules and its tools
+        run: |
+          installables=$(nix eval --raw '.#installables.${{ matrix.variant }}')
+          read -ra targets <<<"$installables"
+          nix build --print-build-logs --no-link --print-out-paths "${targets[@]}" >"$RUNNER_TEMP/paths"
 
       # Pushes each output with its closure; Cachix skips paths that
       # cache.nixos.org already serves.
       - name: Push to Cachix
-        run: |
-          # shellcheck disable=SC2016 # a Nix expression, not shell
-          nix eval --json .#packages.x86_64-linux --apply \
-            'ps: builtins.concatMap (p: map (o: p.${o}.outPath) p.outputs) [ ps."kernel-${{ matrix.variant }}" ps."nvidia-open-${{ matrix.variant }}" ]' \
-            | jq -r '.[]' | cachix push "${{ vars.CACHIX_CACHE }}"
+        run: cachix push "${{ vars.CACHIX_CACHE }}" <"$RUNNER_TEMP/paths"
 
   record:
     needs: [lock, build]
